@@ -23,6 +23,21 @@ class CPU {
      * Store value in memory address, useful for program loading
      */
     poke(address, value) {
+        /*
+        console.log('address:', address, 'value:', value)
+        address: 0 value: 153
+        program: 0 10011001
+        address: 1 value: 0
+        program: 1 00000000
+        address: 2 value: 8
+        program: 2 00001000
+        address: 3 value: 67
+        program: 3 01000011
+        address: 4 value: 0
+        program: 4 00000000
+        address: 5 value: 1
+        program: 5 00000001
+        */
         this.ram.write(address, value);
     }
 
@@ -71,8 +86,9 @@ class CPU {
 
         // !!! IMPLEMENT ME
 
+
         // Debugging output
-        //console.log(`${this.PC}: ${IR.toString(2)}`);
+        // console.log(`${this.PC}: ${IR.toString(2)}`);
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
