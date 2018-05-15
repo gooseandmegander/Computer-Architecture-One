@@ -12,35 +12,22 @@ class CPU {
      */
     constructor(ram) {
         this.ram = ram;
+        // console.log('ram', this.ram)
 
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
+        // console.log('reg', this.reg)
         
         // Special-purpose registers
         this.PC = 0; // Program Counter
+        // console.log('PC', this.PC)
     }
     
     /**
      * Store value in memory address, useful for program loading
      */
     poke(address, value) {
-        /*
-        console.log('address:', address, 'value:', value)
-        address: 0 value: 153
-        program: 0 10011001
-        address: 1 value: 0
-        program: 1 00000000
-        address: 2 value: 8
-        program: 2 00001000
-        address: 3 value: 67
-        program: 3 01000011
-        address: 4 value: 0
-        program: 4 00000000
-        address: 5 value: 1
-        program: 5 00000001
-        */
         this.ram.write(address, value);
     }
-
     /**
      * Starts the clock ticking on the CPU
      */
@@ -85,7 +72,8 @@ class CPU {
         // right now.)
 
         // !!! IMPLEMENT ME
-
+        const IR = this.ram.mem[this.PC];
+        // console.log('IR',IR);
 
         // Debugging output
         // console.log(`${this.PC}: ${IR.toString(2)}`);
@@ -94,11 +82,35 @@ class CPU {
         // needs them.
 
         // !!! IMPLEMENT ME
+        const operandA = this.ram.read(this.PC + 1);
+        const operandB = this.ram.read(this.PC + 2);
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
 
+        const LDI = 0b10011001;
+        const PRN = 0b01000011;
+        const HLT = 0b00000001;
+
         // !!! IMPLEMENT ME
+        switch(IR) {
+            case LDI: // LDI
+            this.reg[operandA] = operandB;
+            this.PC += 3;
+            break;
+            case PRN:
+            console.log(this.reg[operandA]);
+            this.PC += 2
+            case HLT:
+            this.stopClock();
+            this.PC += 1
+            break;
+            default:
+            console.log('Unable to execute');
+            
+
+        }
+
 
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the

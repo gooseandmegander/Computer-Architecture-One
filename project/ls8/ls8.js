@@ -32,6 +32,7 @@ function loadMemory() {
 
 let ram = new RAM(256);
 let cpu = new CPU(ram);
+// console.log('cpu', cpu)
 
 // TODO: get name of ls8 file to load from command line
 
