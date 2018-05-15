@@ -12,14 +12,10 @@ class CPU {
      */
     constructor(ram) {
         this.ram = ram;
-        // console.log('ram', this.ram)
-        
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
-        // console.log('reg', this.reg)
         
         // Special-purpose registers
         this.PC = 0; // Program Counter
-        // console.log('PC', this.PC)
     }
     
     /**
