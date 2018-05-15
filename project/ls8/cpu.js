@@ -6,14 +6,14 @@
  * Class for simulating a simple Computer (CPU & memory)
  */
 class CPU {
-
+    
     /**
      * Initialize the CPU
      */
     constructor(ram) {
         this.ram = ram;
         // console.log('ram', this.ram)
-
+        
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
         // console.log('reg', this.reg)
         
@@ -58,6 +58,7 @@ class CPU {
         switch (op) {
             case 'MUL':
                 // !!! IMPLEMENT ME
+                this.reg[regA] *= this.reg[regB];
                 break;
         }
     }
@@ -91,10 +92,11 @@ class CPU {
         const LDI = 0b10011001;
         const PRN = 0b01000011;
         const HLT = 0b00000001;
+        const MUL = 0b10101010; // ALU operation
 
         // !!! IMPLEMENT ME
         switch(IR) {
-            case LDI: // LDI
+            case LDI:
             this.reg[operandA] = operandB;
             this.PC += 3;
             break;
@@ -105,8 +107,12 @@ class CPU {
             this.stopClock();
             this.PC += 1
             break;
+            case MUL:
+            this.alu('MUL', operandA, operandB);
+            this.PC += 3
+            break;
             default:
-            console.log('Unable to execute');
+            console.log('Unable to execute, IR = ', IR);
             
 
         }
