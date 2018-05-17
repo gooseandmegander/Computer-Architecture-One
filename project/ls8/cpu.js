@@ -2,20 +2,23 @@
  * LS-8 v2.0 emulator skeleton code
  */
 
+// Opcodes for tick() switch statement
 const LDI = 0b10011001;
 const PRN = 0b01000011;
 const HLT = 0b00000001;
 
-const MUL = 0b10101010; // ALU operation
-const DIV = 0b10101011; // ALU operation
-const ADD = 0;
+const MUL = 0b10101010;
+const DIV = 0b10101011;
+const ADD = 0b10101000;
 const SUB = 0;
+const INC = 0;
+const DEC = 0;
 
 const POP = 0b01001100;
 const PUSH = 0b01001101;
 
-const INC = 0;
-const DEC = 0;
+const CALL = 0b01001000;
+const RET = 0b00001001;
 
 /**
  * Class for simulating a simple Computer (CPU & memory)
@@ -27,10 +30,10 @@ class CPU {
   constructor(ram) {
     this.ram = ram;
     this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
+    this.reg[7] = 244;
 
     // Special-purpose registers
     this.PC = 0; // Program Counter
-    this.SP = 243; // Stack Pointer
   }
 
   /**
@@ -68,14 +71,17 @@ class CPU {
   alu(op, regA, regB) {
     switch (op) {
       case 'MUL':
-        // !!! IMPLEMENT ME
         this.reg[regA] *= this.reg[regB];
         break;
 
       case 'DIV':
-        // !!! IMPLEMENT ME
-        this.reg[regA] /= this.reg[regB];
-        break;
+        if (this.reg[regB] === 0) {
+          console.log('Dividing by 0 is illegal!');
+          break;
+        } else {
+          this.reg[regA] /= this.reg[regB];
+          break;
+        }
 
       case 'SUB':
         this.reg[regA] -= this.reg[regB];
@@ -106,8 +112,6 @@ class CPU {
 
     // !!! IMPLEMENT ME
     const IR = this.ram.read(this.PC);
-    // console.log('IR',IR);
-    // console.log('IR format', IR.toString(2))
 
     // Debugging output
     // console.log(`${this.PC}: ${IR.toString(2)}`);
@@ -161,26 +165,30 @@ class CPU {
         break;
 
       case POP:
-        // console.log('=== POP called ===');
-        // console.log('opA', operandA);
-        // console.log('opB', operandB);
-        this.reg[operandA] = this.ram.read(this.SP);
-        this.SP++;
-
+        this.reg[operandA] = this.ram.read(this.reg[7]);
+        this.reg[7]++;
         break;
 
       case PUSH:
-        // console.log('=== PUSH called ===');
-        this.SP--;
-        // console.log(this.ram.read(this.SP + 1));
-        this.ram.write(this.SP, this.reg[operandA]);
-        // console.log('mem', this.ram.mem.slice(240, 250), 'end mem');
+        this.reg[7]--;
+        this.poke(this.reg[7], this.reg[operandA]);
+        break;
+
+      case CALL:
+        this.reg[7]--;
+        this.ram.write(this.reg[7], this.PC + 2);
+        this.PC = this.reg[operandA];
+        break;
+
+      case RET:
+        this.PC = this.ram.read(this.reg[7]);
+        this.reg[7]++;
         break;
 
       default:
         console.log('Unable to execute, IR = ', IR, 'PC = ', this.PC);
         break;
-      // this.stopClock();
+      // this.stopClock() also acceptable in place of break
     }
 
     // Increment the PC register to go to the next instruction. Instructions
@@ -189,7 +197,9 @@ class CPU {
     // for any particular instruction.
 
     // !!! IMPLEMENT ME
-    this.PC += 1 + (IR >> 6);
+    if (IR !== CALL && IR !== RET) {
+      this.PC += 1 + (IR >> 6);
+    }
   }
 }
 
