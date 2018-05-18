@@ -20,6 +20,14 @@ const PUSH = 0b01001101;
 const CALL = 0b01001000;
 const RET = 0b00001001;
 
+const ST = 0b10011010;
+const CMP = 0b10100000;
+const JEQ = 0b01010001;
+const JNE = 0b01010010;
+const JMP = 0b01010000;
+
+const SP = 7;
+
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
@@ -30,7 +38,11 @@ class CPU {
   constructor(ram) {
     this.ram = ram;
     this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
-    this.reg[7] = 244;
+    this.reg[SP] = 244;
+
+    this.FL_EQ = 0;
+    this.FL_GT = 0;
+    this.FL_LT = 0;
 
     // Special-purpose registers
     this.PC = 0; // Program Counter
@@ -165,30 +177,64 @@ class CPU {
         break;
 
       case POP:
-        this.reg[operandA] = this.ram.read(this.reg[7]);
-        this.reg[7]++;
+        this.reg[operandA] = this.ram.read(this.reg[SP]);
+        this.reg[SP]++;
         break;
 
       case PUSH:
-        this.reg[7]--;
-        this.poke(this.reg[7], this.reg[operandA]);
+        this.reg[SP]--;
+        this.poke(this.reg[SP], this.reg[operandA]);
         break;
 
       case CALL:
-        this.reg[7]--;
-        this.ram.write(this.reg[7], this.PC + 2);
+        this.reg[SP]--;
+        this.ram.write(this.reg[SP], this.PC + 2);
         this.PC = this.reg[operandA];
         break;
 
       case RET:
-        this.PC = this.ram.read(this.reg[7]);
-        this.reg[7]++;
+        this.PC = this.ram.read(this.reg[SP]);
+        this.reg[SP]++;
+        break;
+
+      case ST:
+        this.ram.write(this.reg[operandA], this.reg[operandB]);
+        break;
+
+      case CMP:
+        if (this.reg[operandA] === this.reg[operandB]) {
+          this.FL_EQ = 1;
+        } else if (this.reg[operandA] < this.reg[operandB]) {
+          this.FL_LT = 4;
+        } else {
+          this.FL_GT = 2;
+        }
+        break;
+
+      case JEQ:
+        if (this.FL_EQ === 1) {
+          this.PC = this.reg[operandA];
+        } else {
+          this.PC += 2;
+        }
+        break;
+
+      case JNE:
+        if (this.FL_EQ === 0) {
+          this.PC = this.reg[operandA];
+        } else {
+          this.PC += 2;
+        }
+        break;
+
+      case JMP:
+        this.PC = this.reg[operandA];
         break;
 
       default:
         console.log('Unable to execute, IR = ', IR, 'PC = ', this.PC);
+        this.stopClock();
         break;
-      // this.stopClock() also acceptable in place of break
     }
 
     // Increment the PC register to go to the next instruction. Instructions
@@ -197,7 +243,7 @@ class CPU {
     // for any particular instruction.
 
     // !!! IMPLEMENT ME
-    if (IR !== CALL && IR !== RET) {
+    if (IR !== CALL && IR !== RET && IR !== JMP && IR !== JNE && IR !== JEQ) {
       this.PC += 1 + (IR >> 6);
     }
   }
