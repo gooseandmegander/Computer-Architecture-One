@@ -1,32 +1,13 @@
 /**
  * LS-8 v2.0 emulator skeleton code
  */
+// Todos marked by `!! implement`
 
-// Opcodes for tick() switch statement
-const LDI = 0b10011001;
-const PRN = 0b01000011;
-const HLT = 0b00000001;
+const opcodes = require('./opcodes');
 
-const MUL = 0b10101010;
-const DIV = 0b10101011;
-const ADD = 0b10101000;
-const SUB = 0;
-const INC = 0;
-const DEC = 0;
-
-const POP = 0b01001100;
-const PUSH = 0b01001101;
-
-const CALL = 0b01001000;
-const RET = 0b00001001;
-
-const ST = 0b10011010;
-const CMP = 0b10100000;
-const JEQ = 0b01010001;
-const JNE = 0b01010010;
-const JMP = 0b01010000;
-
-const SP = 7;
+const IM = 5; // Interrupt Mask
+const IS = 6; // Interrupt Status
+const SP = 7; // Stack Pointer
 
 /**
  * Class for simulating a simple Computer (CPU & memory)
@@ -38,7 +19,6 @@ class CPU {
   constructor(ram) {
     this.ram = ram;
     this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
-    this.reg[SP] = 244;
 
     this.FL_EQ = 0;
     this.FL_GT = 0;
@@ -82,6 +62,16 @@ class CPU {
    */
   alu(op, regA, regB) {
     switch (op) {
+      case 'CMP':
+        if (this.reg[regA] === this.reg[regB]) {
+          this.FL_EQ = 1;
+        } else if (this.reg[regA] < this.reg[regB]) {
+          this.FL_LT = 4;
+        } else {
+          this.FL_GT = 2;
+        }
+        break;
+
       case 'MUL':
         this.reg[regA] *= this.reg[regB];
         break;
@@ -140,78 +130,125 @@ class CPU {
 
     // !!! IMPLEMENT ME
     switch (IR) {
-      case LDI:
+      case opcodes.AND:
+        // !! implement
+        // add registers and store in regA
+        break;
+
+      case opcodes.LD:
+        // !! implement
+        // load regA with value in address regB
+        // reads from memory
+        // diff btwn LD and LDI?
+        break;
+
+      case opcodes.LDI:
         this.reg[operandA] = operandB;
         break;
 
-      case PRN:
+      case opcodes.MOD:
+        // !! implement
+        // modulo: store result in regA
+        // divide regA by regB, store remainder
+        // if regB value is 0, print err and halt
+        // alu?
+        break;
+
+      case opcodes.NOP:
+        // !! implement
+        // do nothing
+        break;
+
+      case opcodes.NOT:
+        // !! implement
+        // bitwise-NOT on value in given reg
+        break;
+
+      case opcodes.OR:
+        // !! implement
+        // bitwise-OR btwn regA and regB
+        // store result in regA
+        break;
+
+      case opcodes.PRA:
+        // !! implement
+        // print alpha character (ASCII) stored in given regA
+        break;
+
+      case opcodes.PRN:
         console.log(this.reg[operandA]);
         break;
 
-      case HLT:
+      case opcodes.HLT:
         this.stopClock();
         break;
 
-      case MUL:
+      case opcodes.MUL:
         this.alu('MUL', operandA, operandB);
         break;
 
-      case DIV:
+      case opcodes.DIV:
         this.alu('DIV', operandA, operandB);
         break;
 
-      case SUB:
+      case opcodes.SUB:
         this.alu('SUB', operandA, operandB);
         break;
 
-      case ADD:
+      case opcodes.ADD:
         this.alu('ADD', operandA, operandB);
         break;
 
-      case INC:
+      case opcodes.INC:
         this.alu('INC', operandA, null);
         break;
 
-      case DEC:
+      case opcodes.DEC:
         this.alu('DEC', operandA, null);
         break;
 
-      case POP:
+      case opcodes.POP:
         this.reg[operandA] = this.ram.read(this.reg[SP]);
         this.reg[SP]++;
         break;
 
-      case PUSH:
+      case opcodes.PUSH:
         this.reg[SP]--;
         this.poke(this.reg[SP], this.reg[operandA]);
         break;
 
-      case CALL:
+      case opcodes.CALL:
         this.reg[SP]--;
         this.ram.write(this.reg[SP], this.PC + 2);
         this.PC = this.reg[operandA];
         break;
 
-      case RET:
+      case opcodes.RET:
         this.PC = this.ram.read(this.reg[SP]);
         this.reg[SP]++;
         break;
 
-      case ST:
+      case opcodes.ST:
         this.ram.write(this.reg[operandA], this.reg[operandB]);
         break;
 
-      case CMP:
-        if (this.reg[operandA] === this.reg[operandB]) {
-          this.FL_EQ = 1;
-        } else if (this.reg[operandA] < this.reg[operandB]) {
-          this.FL_LT = 4;
-        } else {
-          this.FL_GT = 2;
-        }
+      case opcodes.CMP:
+        this.alu('CMP', operandA, operandB);
         break;
 
-      case JEQ:
+      case opcodes.JGT:
+        // !! implement
+        // if FL_GT is true, jump to address in given reg
+        // opA is only arg
+        break;
+
+      case opcodes.JLT:
+        // !! implement
+        // if FL_LT is true, jump to address in given reg
+        // opA is only arg
+        break;
+
+      case opcodes.JEQ:
         if (this.FL_EQ === 1) {
           this.PC = this.reg[operandA];
         } else {
@@ -219,7 +256,7 @@ class CPU {
         }
         break;
 
-      case JNE:
+      case opcodes.JNE:
         if (this.FL_EQ === 0) {
           this.PC = this.reg[operandA];
         } else {
@@ -227,8 +264,29 @@ class CPU {
         }
         break;
 
-      case JMP:
+      case opcodes.JMP:
         this.PC = this.reg[operandA];
+        break;
+
+      case opcodes.INT:
+        // !! implement
+        // issue interrupt number stored in given register
+        // sets nth bit in IS reg to val in given register
+        break;
+
+      case opcodes.IRET:
+        // !! implement
+        // return from interrupt handler, does not have any args
+        // 1. reg r6-r0 popped off stack in that order
+        // 2. FL reg popped off stack
+        // 3. PC set to return address after popped off stack
+        // 4. interrupts re-enabled
+        break;
+
+      case opcodes.XOR:
+        // !! implement
+        // bitwise-XOR btwn regA and regB
+        // store result in regA
         break;
 
       default:
@@ -243,7 +301,13 @@ class CPU {
     // for any particular instruction.
 
     // !!! IMPLEMENT ME
-    if (IR !== CALL && IR !== RET && IR !== JMP && IR !== JNE && IR !== JEQ) {
+    if (
+      IR !== opcodes.CALL &&
+      IR !== opcodes.RET &&
+      IR !== opcodes.JMP &&
+      IR !== opcodes.JNE &&
+      IR !== opcodes.JEQ
+    ) {
       this.PC += 1 + (IR >> 6);
     }
   }

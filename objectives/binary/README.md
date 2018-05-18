@@ -18,7 +18,6 @@ in.
 Re-read the last paragraph for good measure and keep it in mind in the following
 review.
 
-
 ## On Bases
 
 The _base_ of a numbering system refers to how many digits the numbering system
@@ -37,11 +36,11 @@ These different bases have different ways of being represented in JavaScript:
 ```javascript
 // All of these represent the number of apples on the table:
 
-let numA = 12;     // decimal
-let numB = 0xC;    // hexadecimal, leading 0x
+let numA = 12; // decimal
+let numB = 0xc; // hexadecimal, leading 0x
 let numC = 0b1100; // binary, leading 0b
 
-numA === numB === numC; // TRUE!
+(numA === numB) === numC; // TRUE!
 ```
 
 ## On Binary
@@ -67,9 +66,8 @@ reasons. One is that it's easy to represent as a voltage on a wire: 0 volts is a
 `0` and 5 volts (or whatever) is a `1`. Another is that you can do boolean logic
 with `0` being `FALSE` and `1` being `TRUE`.
 
-> *There are 10 kinds of people in the world: those who understand binary and
-those who don't.*
-
+> _There are 10 kinds of people in the world: those who understand binary and
+> those who don't._
 
 ## Convert Binary to Decimal
 
@@ -162,9 +160,10 @@ so that's 1, too:
     1111xxx     All the x's are unknown
 
 Then we compute `11-8=3` and do the next power of two: 4. There are zero 4s in
-3. so that's a 0 for a change:
 
-    11110xx     All the x's are unknown
+3.  so that's a 0 for a change:
+
+    11110xx All the x's are unknown
 
 We're still at 3 decimal, but we drop to the next power of two: 2. There is one
 2 in 3, so that's a 1:
@@ -175,7 +174,6 @@ And we compute `3-2=1`, and drop to the last power of two: 1. There is
 one 1 in 1, so that's a 1:
 
     1111011 binary is 123 decimal
-
 
 ## Hexadecimal
 
@@ -223,7 +221,6 @@ a leading `0x` in JS, C, and many other languages.)
 
 Converting hex to binary is the same in reverse. 4 bits per hex digit.
 
-
 ## Exercises
 
 Perform the following conversions by hand, then write JS code to convert them
@@ -231,18 +228,52 @@ and check your work.
 
 * Convert 78 decimal to binary.
 
+  ```
+  binary: 01001110
+  ```
+
 * Convert 1111 binary to decimal. Then convert 10000 binary to decimal.
   What conclusion can you make about binary numbers that end in a solid
   sequence of 1s?
 
+  ```
+  decimal of 1111: 15
+  decimal of 10000: 16
+  conclusion: Binary 11111111 computes to 2^0 + 2^1 + ... + 2^8.
+  ```
+
 * Convert 111 to binary.
+
+  ```
+  binary: 7
+  ```
 
 * Convert 111 to hexadecimal.
 
+  ```
+  hexadecimal: ...
+  ```
+
 * Convert 0x10 to decimal.
+
+  ```
+  decimal: ...
+  ```
 
 * Convert 0xe2 to decimal.
 
+  ```
+  decimal: ...
+  ```
+
 * Convert 0xff to decimal.
 
+  ```
+  decimal: ...
+  ```
+
 * Convert 0x12345678 to binary.
+
+  ```
+  binary: ...
+  ```
